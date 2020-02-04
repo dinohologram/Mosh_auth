@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt')
+const Joi = require('joi')
 
 //Authorization
 //
@@ -10,7 +11,7 @@ router.post('/', async (req, res) => {
     const { error } = validate(req.body);
     if (error) return error.status(400).send(error.details[0].message);
 
-    let user = await User.findOne('email: req.body.email');
+    let user = await User.findOne({"email" : req.body.email});
     if (!user) res.status(400).send('No account exists');
     
     let validPassword = bcrypt.compare(req.body.password, user.password);
@@ -24,7 +25,7 @@ router.post('/', async (req, res) => {
 
 function validate(req) {
     let schema = {
-        email: Joi.string().required().email().min(1).max(200)
+        email: Joi.string().required().email().min(1).max(200),
         password: Joi.string().required().min(8).max(1024)
     }
     return Joi.validate(req, schema)
